@@ -15,16 +15,33 @@ email_password = os.environ.get("MY_EMAIL_PASSWORD")
 email_receiver = os.environ.get("TO_EMAIL")
 
 headers = {
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-    "Accept-Language": "en-US,en;q=0.9"
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9,zh-CN;q=0.8,zh-TW;q=0.7,zh;q=0.6",
+        "Priority": "u=0, i",
+        # "Host": "httpbin.org",
+        "Sec-Ch-Ua": "\"Chromium\";v=\"124\", \"Google Chrome\";v=\"124\", \"Not-A.Brand\";v=\"99\"",
+        "Sec-Ch-Ua-Mobile": "?0",
+        "Sec-Ch-Ua-Platform": "\"macOS\"",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "cross-site",
+        "Sec-Fetch-User": "?1",
+        "Upgrade-Insecure-Requests": "1",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
 }
-amazon_product_page = requests.get(URL, headers).text
+
+amazon_product_page = requests.get(URL, headers=headers).text
+# generate amazon.html for troubleshooeting
+# with open('amazon.html', mode="w", encoding="utf-8") as fp:
+#     fp.write(amazon_product_page)
 soup = BeautifulSoup(amazon_product_page, "lxml")
 
-price_whole = int(soup.find(class_="a-price-whole").getText().split(".")[0])
-price_decimal = int(soup.select_one("span.a-price-fraction").getText())
-price = price_whole + (price_decimal * 0.01)
+string_price = soup.find(name='span', attrs={"class": "priceToPay"}).getText()
+# remove first white space and the $ sign from the string
+price = float(string_price[2:])
 product_title = soup.select_one("span[id=productTitle]").getText().strip()
+# print(price)
 # print(f"{product_title}\n${price}")
 
 message = (f"Subject:Amazon Deal Alert\n\n"
